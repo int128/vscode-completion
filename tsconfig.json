@@ -5,6 +5,7 @@
     "module": "esnext",
     "allowImportingTsExtensions": true,
     "noEmit": true,
+    "skipLibCheck": true,
     "types": ["node"]
   }
 }
