@@ -23,14 +23,14 @@ export class InlineCompletionAgent {
       id: 'inline-code-completion',
       name: 'inline-code-completion',
       instructions: `
+Complete the code exactly at the insertion point between the provided PREFIX and SUFFIX.
 You are an inline code completion engine.
-Fill in the code that belongs EXACTLY at the insertion point between the provided PREFIX and SUFFIX.
 
 Strict Rules:
-1. Output ONLY the raw code to be inserted at the cursor position.
-2. Do NOT wrap the response in markdown code blocks (e.g. no \`\`\`typescript ... \`\`\`).
-3. Do NOT repeat any code from the PREFIX or SUFFIX.
-4. Do NOT provide explanations, comments, or conversational text.
+1. Output only the raw code to insert at the cursor position.
+2. Do not wrap the response in markdown code blocks.
+3. Do not repeat any code from the PREFIX or SUFFIX.
+4. Do not provide explanations, comments, or conversational text.
 5. If no completion is needed, output an empty string.
 `,
       model: {
@@ -62,7 +62,12 @@ ${suffix}
       modelSettings: {
         temperature: 0.1,
         maxOutputTokens: 1024,
-        reasoning: 'low',
+        reasoning: 'none',
+      },
+      providerOptions: {
+        openai: {
+          reasoningEffort: 'none',
+        },
       },
     })
     console.debug(`[vscode-completion] ${new Date().toISOString()}: Total ${response.totalUsage.totalTokens} tokens`)
