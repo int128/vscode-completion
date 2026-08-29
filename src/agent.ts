@@ -56,14 +56,22 @@ ${suffix}
 <END>
 `
 
-    console.info(prompt)
+    console.debug(`[vscode-completion] ${new Date().toISOString()}: generate()`)
     const response = await this.agent.generate(prompt, {
       abortSignal: signal,
       modelSettings: {
         temperature: 0.1,
-        maxOutputTokens: 128,
+        maxOutputTokens: 1024,
+        reasoning: 'low',
       },
     })
+    console.debug(`[vscode-completion] ${new Date().toISOString()}: Total ${response.totalUsage.totalTokens} tokens`)
+    if (signal.aborted) {
+      return []
+    }
+    if (response.finishReason !== 'stop') {
+      throw new Error(`Agent failed: ${response.finishReason}`)
+    }
 
     return [new vscode.InlineCompletionItem(response.text, new vscode.Range(position, position))]
   }

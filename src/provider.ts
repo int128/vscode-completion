@@ -16,16 +16,20 @@ export class InlineCompletionItemProvider implements vscode.InlineCompletionItem
     _context: vscode.InlineCompletionContext,
     cancellationToken: vscode.CancellationToken,
   ) {
-    const cancellationController = new AbortController()
-    cancellationToken.onCancellationRequested(() => cancellationController.abort())
-    return await this.debouncer.run(cancellationController.signal, async () => {
-      try {
-        return await this.agent.generate(document, position, cancellationController.signal)
-      } catch (error) {
-        vscode.window.showErrorMessage(`Inline completion error: ${error}`)
-        throw error
+    try {
+      const cancellationController = new AbortController()
+      cancellationToken.onCancellationRequested(() => cancellationController.abort())
+      return await this.debouncer.run(
+        cancellationController.signal,
+        async () => await this.agent.generate(document, position, cancellationController.signal),
+      )
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return []
       }
-    })
+      vscode.window.showErrorMessage(`Inline completion failed: ${error}`)
+      throw error
+    }
   }
 }
 
