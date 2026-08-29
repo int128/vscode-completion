@@ -1,13 +1,16 @@
 import { setTimeout } from 'node:timers/promises'
 import * as vscode from 'vscode'
 import type { InlineCompletionAgent } from './agent.ts'
+import type { InlineCompletionStatus } from './status.ts'
 
 export class InlineCompletionItemProvider implements vscode.InlineCompletionItemProvider {
   private readonly debouncer = new Debouncer(300)
   private readonly agent
+  private readonly inlineCompletionStatus
 
-  constructor(agent: InlineCompletionAgent) {
+  constructor(agent: InlineCompletionAgent, inlineCompletionStatus: InlineCompletionStatus) {
     this.agent = agent
+    this.inlineCompletionStatus = inlineCompletionStatus
   }
 
   async provideInlineCompletionItems(
@@ -19,16 +22,18 @@ export class InlineCompletionItemProvider implements vscode.InlineCompletionItem
     try {
       const cancellationController = new AbortController()
       cancellationToken.onCancellationRequested(() => cancellationController.abort())
-      return await this.debouncer.run(
-        cancellationController.signal,
-        async () => await this.agent.generate(document, position, cancellationController.signal),
-      )
+      return await this.debouncer.run(cancellationController.signal, async () => {
+        this.inlineCompletionStatus.start()
+        return await this.agent.generate(document, position, cancellationController.signal)
+      })
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
         return []
       }
       vscode.window.showErrorMessage(`Inline completion failed: ${error}`)
       throw error
+    } finally {
+      this.inlineCompletionStatus.finish()
     }
   }
 }
