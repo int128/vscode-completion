@@ -20,16 +20,18 @@
       "properties": {
         "vscodeCompletion.agent.providerId": {
           "type": "string",
-          "default": "google",
+          "default": "openai",
           "scope": "application",
           "markdownDescription": "Model provider",
           "enum": [
+            "openai",
+            "anthropic",
             "google"
           ]
         },
         "vscodeCompletion.agent.modelId": {
           "type": "string",
-          "default": "gemini-3.5-flash-lite",
+          "default": "gpt-5.6-luna",
           "scope": "application",
           "markdownDescription": "Model identifier. See https://mastra.ai/models"
         },
@@ -45,7 +47,6 @@
     "vscode": "^1.100.0"
   },
   "devDependencies": {
-    "@ai-sdk/google": "4.0.44",
     "@biomejs/biome": "2.5.7",
     "@mastra/core": "1.59.0",
     "@types/node": "26.2.0",
