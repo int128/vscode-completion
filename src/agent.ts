@@ -2,7 +2,7 @@ import { Agent } from '@mastra/core/agent'
 import * as vscode from 'vscode'
 
 export class InlineCompletionAgent {
-  private readonly contextLineSize = 30
+  private readonly contextLineSize = 10
   private agent
 
   static async create(configuration: InlineCompletionAgentConfiguration) {
@@ -48,20 +48,14 @@ Strict Rules:
     const suffix = document.getText(
       new vscode.Range(position, new vscode.Position(position.line + this.contextLineSize, 0)),
     )
-    const prompt = `
-<PREFIX>
-${prefix}
-<SUFFIX>
-${suffix}
-<END>
-`
+    const prompt = `<PREFIX>${prefix}<SUFFIX>${suffix}<MIDDLE>`
 
     console.debug(`[vscode-completion] ${new Date().toISOString()}: generate()`)
     const response = await this.agent.generate(prompt, {
       abortSignal: signal,
       modelSettings: {
         temperature: 0.1,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 128,
         reasoning: 'none',
       },
       providerOptions: {
