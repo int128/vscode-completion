@@ -42,12 +42,12 @@ export class InlineCompletionItemProvider implements vscode.InlineCompletionItem
 
   private shouldTrigger(document: vscode.TextDocument, position: vscode.Position): boolean {
     const prefix = document.getText(new vscode.Range(new vscode.Position(position.line, 0), position))
-    const onEmptyLine = prefix.trim() === ''
-    if (onEmptyLine) {
+    const afterWhitespace = /\s+$/.test(prefix)
+    if (afterWhitespace) {
       return true
     }
-    const beforeSymbol = /[.,=<>:()[\]]\s*$/.test(prefix)
-    if (beforeSymbol) {
+    const afterSymbol = /[.,=<>:()[\]-]\s*$/.test(prefix)
+    if (afterSymbol) {
       return true
     }
     const inComment = /^\s*[/#]/.test(prefix)
